@@ -304,11 +304,17 @@ img{max-width:100%;display:block}
         </select>
 
         <div class="label">შესრულების ვადა</div>
-        <input class="input" id="ntDeadline" type="datetime-local">
+        <input class="input" id="ntDate" type="date">
+        <div style="display:flex;gap:8px;margin-top:8px;align-items:center">
+          <select class="select" id="ntHour" style="margin-top:0;flex:1;text-align:center"></select>
+          <span style="font-size:20px;font-weight:800;color:var(--muted)">:</span>
+          <select class="select" id="ntMin" style="margin-top:0;flex:1;text-align:center"></select>
+        </div>
 
         <div class="label">📷 ფოტოები (სურვილისამებრ)</div>
-        <div class="att-grid" id="ntAttGrid"></div>
+        <button type="button" class="btn secondary" style="margin-top:8px" onclick="document.getElementById('ntFileInput').click()">📷 ფოტოს დამატება</button>
         <input type="file" id="ntFileInput" accept="image/*" multiple capture="environment" style="display:none" onchange="handleNewTaskFiles(event)">
+        <div class="att-grid" id="ntAttGrid" style="margin-top:10px"></div>
 
         <button class="btn" onclick="submitTask()" id="ntSubmit">დავალების შექმნა</button>
         <div id="ntAlert"></div>
@@ -570,18 +576,46 @@ function switchTab(t) {
   if (t === "users") loadUsersList();
   if (t === "create") {
     renderAssigneePicker();
+    buildTimeSelectors();
     renderNewTaskAttachments();
     setDefaultDeadline();
   }
 }
 
+function buildTimeSelectors() {
+  const hSel = $("ntHour");
+  const mSel = $("ntMin");
+  if (!hSel || hSel.options.length) return; // already built
+  for (let h = 0; h < 24; h++) {
+    const opt = document.createElement("option");
+    opt.value = String(h).padStart(2, "0");
+    opt.text = String(h).padStart(2, "0");
+    hSel.appendChild(opt);
+  }
+  for (let m = 0; m < 60; m += 5) {
+    const opt = document.createElement("option");
+    opt.value = String(m).padStart(2, "0");
+    opt.text = String(m).padStart(2, "0");
+    mSel.appendChild(opt);
+  }
+}
+
 function setDefaultDeadline() {
-  if ($("ntDeadline").value) return;
+  if ($("ntDate").value) return;
   const d = new Date();
   d.setDate(d.getDate() + 1);
-  d.setHours(18, 0, 0, 0);
   const pad = n => String(n).padStart(2, "0");
-  $("ntDeadline").value = `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  $("ntDate").value = `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+  $("ntHour").value = "18";
+  $("ntMin").value = "00";
+}
+
+function getDeadlineValue() {
+  const date = $("ntDate").value;
+  const hour = $("ntHour").value || "00";
+  const min = $("ntMin").value || "00";
+  if (!date) return "";
+  return `${date}T${hour}:${min}`;
 }
 
 // ============================================
@@ -757,16 +791,13 @@ let newTaskFiles = []; // selected File objects before submit
 function renderNewTaskAttachments() {
   const grid = $("ntAttGrid");
   if (!grid) return;
-  let html = newTaskFiles.map((f, i) => `
+  if (!newTaskFiles.length) { grid.innerHTML = ""; return; }
+  grid.innerHTML = newTaskFiles.map((f, i) => `
     <div class="att" onclick="removeNewTaskFile(${i})" title="დააჭირე წასაშლელად">
       <img src="${URL.createObjectURL(f)}" alt="">
       <div class="name">✕ წაშლა</div>
     </div>
   `).join("");
-  html += `<div class="att upload" onclick="document.getElementById('ntFileInput').click()">
-    <span class="ic">📷</span><span>დამატება</span>
-  </div>`;
-  grid.innerHTML = html;
 }
 
 function handleNewTaskFiles(e) {
@@ -786,7 +817,7 @@ async function submitTask() {
   const description = $("ntDesc").value.trim();
   const assignedTo = getSelectedAssignees();
   const priority = $("ntPriority").value;
-  const deadline = $("ntDeadline").value;
+  const deadline = getDeadlineValue();
 
   if (!title || !description || !assignedTo.length || !deadline) {
     alertBox("ntAlert", "შეავსე ყველა ველი და აირჩიე მინ. ერთი შემსრულებელი");
@@ -834,7 +865,8 @@ async function submitTask() {
   btn.disabled = false; btn.innerHTML = "დავალების შექმნა";
   alertBox("ntAlert", "");
   $("ntTitle").value = ""; $("ntDesc").value = "";
-  $("ntPriority").value = "normal"; $("ntDeadline").value = "";
+  $("ntPriority").value = "normal";
+  $("ntDate").value = ""; $("ntHour").value = "18"; $("ntMin").value = "00";
   newTaskFiles = [];
   renderNewTaskAttachments();
   renderAssigneePicker();
