@@ -570,6 +570,7 @@ function switchTab(t) {
   if (t === "users") loadUsersList();
   if (t === "create") {
     renderAssigneePicker();
+    renderNewTaskAttachments();
     setDefaultDeadline();
   }
 }
@@ -749,8 +750,37 @@ function renderTasks() {
 }
 
 // ============================================
-// Create task
+// Create task (with optional attachments)
 // ============================================
+let newTaskFiles = []; // selected File objects before submit
+
+function renderNewTaskAttachments() {
+  const grid = $("ntAttGrid");
+  if (!grid) return;
+  let html = newTaskFiles.map((f, i) => `
+    <div class="att" onclick="removeNewTaskFile(${i})" title="დააჭირე წასაშლელად">
+      <img src="${URL.createObjectURL(f)}" alt="">
+      <div class="name">✕ წაშლა</div>
+    </div>
+  `).join("");
+  html += `<div class="att upload" onclick="document.getElementById('ntFileInput').click()">
+    <span class="ic">📷</span><span>დამატება</span>
+  </div>`;
+  grid.innerHTML = html;
+}
+
+function handleNewTaskFiles(e) {
+  const files = Array.from(e.target.files || []);
+  files.forEach(f => { if (f.type.startsWith("image/")) newTaskFiles.push(f); });
+  renderNewTaskAttachments();
+  e.target.value = "";
+}
+
+function removeNewTaskFile(i) {
+  newTaskFiles.splice(i, 1);
+  renderNewTaskAttachments();
+}
+
 async function submitTask() {
   const title = $("ntTitle").value.trim();
   const description = $("ntDesc").value.trim();
@@ -764,16 +794,49 @@ async function submitTask() {
   }
   const btn = $("ntSubmit");
   btn.disabled = true; btn.innerHTML = '<span class="loader"></span>';
+  $("ntProgress").innerText = "";
+
   const res = await api({
     action: "createTask",
     userId: user.ID,
     title, description, assignedTo, priority, deadline
   });
+
+  if (!res.success) {
+    btn.disabled = false; btn.innerHTML = "დავალების შექმნა";
+    alertBox("ntAlert", res.error || "შეცდომა");
+    return;
+  }
+
+  // Upload attachments one-by-one (Apps Script handles them sequentially anyway)
+  if (newTaskFiles.length) {
+    for (let i = 0; i < newTaskFiles.length; i++) {
+      $("ntProgress").innerText = `ფოტოები იტვირთება ${i+1}/${newTaskFiles.length}...`;
+      try {
+        const file = newTaskFiles[i];
+        const resized = await resizeImage(file, 1600, 0.85);
+        const base64 = await fileToBase64(resized);
+        await api({
+          action: "uploadAttachment",
+          userId: user.ID,
+          taskId: res.taskId,
+          fileName: file.name || `photo_${i+1}.jpg`,
+          mimeType: "image/jpeg",
+          fileData: base64
+        });
+      } catch (e) {
+        // continue with next file even if one fails
+      }
+    }
+    $("ntProgress").innerText = "";
+  }
+
   btn.disabled = false; btn.innerHTML = "დავალების შექმნა";
-  if (!res.success) { alertBox("ntAlert", res.error || "შეცდომა"); return; }
   alertBox("ntAlert", "");
   $("ntTitle").value = ""; $("ntDesc").value = "";
   $("ntPriority").value = "normal"; $("ntDeadline").value = "";
+  newTaskFiles = [];
+  renderNewTaskAttachments();
   renderAssigneePicker();
   toast("დავალება შექმნილია!", "success");
   switchTab("tasks");
