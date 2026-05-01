@@ -6,56 +6,139 @@
 <title>Task System</title>
 
 <style>
-*{box-sizing:border-box;font-family:sans-serif;}
-body{margin:0;background:#0f172a;color:#fff;}
-.app{max-width:500px;margin:auto;padding:15px;}
+*{
+  box-sizing:border-box;
+  font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+}
 
-.card{
-background:#1e293b;
-padding:15px;
-border-radius:18px;
-margin-bottom:12px;
+body{
+  margin:0;
+  background:#0f172a;
+  color:#fff;
+}
+
+.app{
+  max-width:520px;
+  margin:auto;
+  padding:14px;
+  padding-bottom:40px;
+}
+
+.card,.task,.stat{
+  background:#1e293b;
+  border:1px solid #334155;
+  padding:15px;
+  border-radius:18px;
+  margin-bottom:12px;
+}
+
+h2,h3,h4,p{
+  margin-top:0;
 }
 
 input,select,textarea{
-width:100%;
-padding:12px;
-margin-top:8px;
-border-radius:10px;
-border:none;
-background:#334155;
-color:#fff;
+  width:100%;
+  padding:13px;
+  margin-top:8px;
+  border-radius:12px;
+  border:1px solid #475569;
+  background:#334155;
+  color:#fff;
+  font-size:15px;
+}
+
+textarea{
+  min-height:90px;
+  resize:vertical;
 }
 
 button{
-width:100%;
-padding:14px;
-margin-top:10px;
-border:none;
-border-radius:12px;
-font-weight:bold;
-background:#2563eb;
-color:#fff;
+  width:100%;
+  padding:14px;
+  margin-top:10px;
+  border:none;
+  border-radius:13px;
+  font-weight:800;
+  background:#2563eb;
+  color:#fff;
+  font-size:15px;
 }
 
-.task{
-background:#1e293b;
-padding:12px;
-border-radius:14px;
-margin-top:10px;
+button.red{
+  background:#ef4444;
 }
-
-.red{border:2px solid #ef4444;}
-.green{border:2px solid #22c55e;}
 
 .topbar{
-display:flex;
-justify-content:space-between;
-align-items:center;
-margin-bottom:10px;
+  display:flex;
+  gap:10px;
+  align-items:center;
+  justify-content:space-between;
+  margin-bottom:12px;
 }
 
-.small{font-size:12px;color:#94a3b8;}
+.topbar button{
+  width:auto;
+  padding:10px 14px;
+  margin:0;
+}
+
+.small{
+  font-size:13px;
+  color:#94a3b8;
+  line-height:1.5;
+}
+
+.task.overdue{
+  border:2px solid #ef4444;
+  background:#2a1820;
+}
+
+.task.completed{
+  border:2px solid #22c55e;
+}
+
+.badge{
+  display:inline-block;
+  padding:5px 9px;
+  border-radius:999px;
+  font-size:12px;
+  font-weight:800;
+  background:#334155;
+  margin-top:6px;
+}
+
+.stats{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+  margin-bottom:12px;
+}
+
+.stat{
+  margin:0;
+  text-align:center;
+}
+
+.stat b{
+  display:block;
+  font-size:24px;
+  margin-top:5px;
+}
+
+.hidden{
+  display:none;
+}
+
+hr{
+  border:none;
+  border-top:1px solid #334155;
+  margin:18px 0;
+}
+
+#msg{
+  margin-top:10px;
+  color:#fca5a5;
+}
 </style>
 </head>
 
@@ -63,62 +146,97 @@ margin-bottom:10px;
 
 <div class="app">
 
-<!-- AUTH -->
-<div id="auth">
+  <div id="auth">
+    <div class="card">
+      <h2>Task System</h2>
+      <p class="small">თანამშრომლების დავალებების მართვის სისტემა</p>
 
-<h2>Task System</h2>
+      <h4>შესვლა</h4>
+      <input id="loginPhone" placeholder="ტელეფონი / admin">
+      <input id="loginPassword" placeholder="პაროლი / 1234" type="password">
+      <button onclick="login()">შესვლა</button>
 
-<input id="phone" placeholder="ტელეფონი">
-<input id="pass" placeholder="პაროლი" type="password">
+      <hr>
 
-<button onclick="login()">შესვლა</button>
+      <h4>რეგისტრაცია</h4>
+      <input id="regName" placeholder="სახელი და გვარი">
+      <input id="regPhone" placeholder="ტელეფონი">
+      <input id="regPassword" placeholder="პაროლი" type="password">
+      <input id="regPosition" placeholder="პოზიცია">
+      <button onclick="registerUser()">რეგისტრაცია</button>
 
-<hr>
+      <p id="msg"></p>
+    </div>
+  </div>
 
-<input id="name" placeholder="სახელი გვარი">
-<input id="rphone" placeholder="ტელეფონი">
-<input id="rpass" placeholder="პაროლი">
-<input id="pos" placeholder="პოზიცია">
+  <div id="dash" class="hidden">
 
-<button onclick="register()">რეგისტრაცია</button>
+    <div class="topbar">
+      <div>
+        <h3 id="username"></h3>
+        <div id="userrole" class="small"></div>
+      </div>
+      <button class="red" onclick="logout()">გასვლა</button>
+    </div>
 
-<p id="msg"></p>
+    <div id="adminStats" class="hidden">
+      <h4>ადმინის სტატისტიკა</h4>
 
-</div>
+      <div class="stats">
+        <div class="stat">
+          სულ
+          <b id="statAll">0</b>
+        </div>
+        <div class="stat">
+          ახალი
+          <b id="statNew">0</b>
+        </div>
+        <div class="stat">
+          პროცესში
+          <b id="statProgress">0</b>
+        </div>
+        <div class="stat">
+          ვადაგადაცილებული
+          <b id="statOverdue">0</b>
+        </div>
+        <div class="stat">
+          დასრულებული
+          <b id="statCompleted">0</b>
+        </div>
+        <div class="stat">
+          პრობლემა
+          <b id="statProblem">0</b>
+        </div>
+      </div>
+    </div>
 
-<!-- DASHBOARD -->
-<div id="dash" style="display:none">
+    <div class="card">
+      <h4>დავალების შექმნა</h4>
 
-<div class="topbar">
-<h3 id="username"></h3>
-<button onclick="logout()">გასვლა</button>
-</div>
+      <input id="title" placeholder="დავალების სათაური">
+      <textarea id="desc" placeholder="დავალების აღწერა"></textarea>
 
-<div class="card">
+      <label class="small">შემსრულებელი</label>
+      <select id="users"></select>
 
-<h4>დავალების შექმნა</h4>
+      <label class="small">პრიორიტეტი</label>
+      <select id="priority">
+        <option value="low">დაბალი</option>
+        <option value="normal" selected>ჩვეულებრივი</option>
+        <option value="high">მაღალი</option>
+        <option value="urgent">სასწრაფო</option>
+      </select>
 
-<input id="title" placeholder="სათაური">
-<textarea id="desc" placeholder="აღწერა"></textarea>
+      <label class="small">შესრულების ვადა</label>
+      <input id="deadline" type="datetime-local">
 
-<select id="users"></select>
+      <button onclick="createTask()">დავალების შექმნა</button>
+    </div>
 
-<select id="priority">
-<option value="low">Low</option>
-<option value="normal">Normal</option>
-<option value="high">High</option>
-<option value="urgent">Urgent</option>
-</select>
+    <h4>დავალებები</h4>
+    <div id="tasks"></div>
 
-<input id="deadline" type="datetime-local">
-
-<button onclick="createTask()">შექმნა</button>
-
-</div>
-
-<div id="tasks"></div>
-
-</div>
+  </div>
 
 </div>
 
@@ -126,143 +244,264 @@ margin-bottom:10px;
 const API = "https://script.google.com/macros/s/AKfycbwkkhmujGNq5iF-esZVKwR2hkMRApMuSzFvr0HKdqJ1uToJvOOvgC0JVA17iMQu4Ler/exec";
 
 let currentUser = null;
+let allTasks = [];
 
 async function api(data){
-const res = await fetch(API,{method:"POST",body:JSON.stringify(data)});
-return await res.json();
+  try{
+    const res = await fetch(API,{
+      method:"POST",
+      body:JSON.stringify(data)
+    });
+    return await res.json();
+  }catch(e){
+    return {success:false,error:"სერვერთან კავშირი ვერ მოხერხდა"};
+  }
+}
+
+function isAdmin(){
+  return currentUser &&
+    (currentUser.Role === "super_admin" || currentUser.Role === "admin");
 }
 
 async function login(){
-let phone=document.getElementById("phone").value;
-let password=document.getElementById("pass").value;
+  const phone = document.getElementById("loginPhone").value.trim();
+  const password = document.getElementById("loginPassword").value.trim();
 
-let res=await api({action:"login",phone,password});
+  if(!phone || !password){
+    msg.innerText = "ტელეფონი და პაროლი აუცილებელია";
+    return;
+  }
 
-if(!res.success){
-msg.innerText=res.error;
-return;
+  const res = await api({
+    action:"login",
+    phone,
+    password
+  });
+
+  if(!res.success){
+    msg.innerText = res.error || "შესვლა ვერ შესრულდა";
+    return;
+  }
+
+  currentUser = res.user;
+  localStorage.setItem("taskUser",JSON.stringify(currentUser));
+  init();
 }
 
-currentUser=res.user;
-localStorage.setItem("user",JSON.stringify(res.user));
+async function registerUser(){
+  const name = document.getElementById("regName").value.trim();
+  const phone = document.getElementById("regPhone").value.trim();
+  const password = document.getElementById("regPassword").value.trim();
+  const position = document.getElementById("regPosition").value.trim();
 
-init();
-}
+  if(!name || !phone || !password || !position){
+    msg.innerText = "ყველა ველის შევსება აუცილებელია";
+    return;
+  }
 
-async function register(){
-let name=nameInput.value;
-let phone=rphone.value;
-let password=rpass.value;
-let position=pos.value;
+  const res = await api({
+    action:"register",
+    name,
+    phone,
+    password,
+    position
+  });
 
-let res=await api({action:"register",name,phone,password,position});
+  if(!res.success){
+    msg.innerText = res.error || "რეგისტრაცია ვერ შესრულდა";
+    return;
+  }
 
-msg.innerText=res.success?"OK":"ERROR";
+  msg.style.color = "#86efac";
+  msg.innerText = "რეგისტრაცია წარმატებით დასრულდა. ახლა შედი სისტემაში.";
+  document.getElementById("loginPhone").value = phone;
 }
 
 function logout(){
-localStorage.clear();
-location.reload();
+  localStorage.removeItem("taskUser");
+  location.reload();
 }
 
 async function init(){
-auth.style.display="none";
-dash.style.display="block";
+  document.getElementById("auth").style.display = "none";
+  document.getElementById("dash").classList.remove("hidden");
 
-username.innerText=currentUser.Name;
+  username.innerText = currentUser.Name;
+  userrole.innerText = currentUser.Position + " / " + currentUser.Role;
 
-await loadUsers();
-await loadTasks();
+  if(isAdmin()){
+    adminStats.classList.remove("hidden");
+  }else{
+    adminStats.classList.add("hidden");
+  }
+
+  await loadUsers();
+  await loadTasks();
 }
 
 async function loadUsers(){
-let res=await api({action:"getUsers",userId:currentUser.ID});
+  const res = await api({
+    action:"getUsers",
+    userId:currentUser.ID
+  });
 
-users.innerHTML="";
+  users.innerHTML = "";
 
-res.users.forEach(u=>{
-let opt=document.createElement("option");
-opt.value=u.ID;
-opt.innerText=u.Name;
-users.appendChild(opt);
-});
+  if(!res.success){
+    users.innerHTML = "<option>თანამშრომლები ვერ ჩაიტვირთა</option>";
+    return;
+  }
+
+  res.users.forEach(u=>{
+    const opt = document.createElement("option");
+    opt.value = u.ID;
+    opt.innerText = u.Name + " — " + u.Position;
+    users.appendChild(opt);
+  });
 }
 
 async function createTask(){
-let titleVal=title.value;
-let descVal=desc.value;
-let assigned=users.value;
-let priorityVal=priority.value;
-let deadlineVal=deadline.value;
+  const titleVal = title.value.trim();
+  const descVal = desc.value.trim();
+  const assigned = users.value;
+  const priorityVal = priority.value;
+  const deadlineVal = deadline.value;
 
-let res=await api({
-action:"createTask",
-userId:currentUser.ID,
-title:titleVal,
-description:descVal,
-assignedTo:[assigned],
-priority:priorityVal,
-deadline:deadlineVal
-});
+  if(!titleVal || !descVal || !assigned || !deadlineVal){
+    alert("ყველა ველის შევსება აუცილებელია");
+    return;
+  }
 
-if(res.success){
-title.value="";
-desc.value="";
-loadTasks();
-}
+  const res = await api({
+    action:"createTask",
+    userId:currentUser.ID,
+    title:titleVal,
+    description:descVal,
+    assignedTo:[assigned],
+    priority:priorityVal,
+    deadline:deadlineVal
+  });
+
+  if(!res.success){
+    alert(res.error || "დავალება ვერ შეიქმნა");
+    return;
+  }
+
+  title.value = "";
+  desc.value = "";
+  deadline.value = "";
+
+  await loadTasks();
 }
 
 async function loadTasks(){
-let res=await api({action:"getTasks",userId:currentUser.ID});
+  const res = await api({
+    action:"getTasks",
+    userId:currentUser.ID
+  });
 
-tasks.innerHTML="";
+  tasks.innerHTML = "";
 
-res.tasks.forEach(t=>{
+  if(!res.success){
+    tasks.innerHTML = "<div class='card'>დავალებები ვერ ჩაიტვირთა</div>";
+    return;
+  }
 
-let div=document.createElement("div");
-div.className="task";
+  allTasks = res.tasks || [];
 
-if(t.Status==="overdue") div.classList.add("red");
-if(t.Status==="completed") div.classList.add("green");
-
-div.innerHTML=`
-<b>${t.Title}</b><br>
-<span class="small">${t.Description}</span><br><br>
-
-Assigned: ${t.AssignedNames}<br>
-Deadline: ${t.Deadline}<br>
-Status: ${t.Status}<br><br>
-
-<select onchange="changeStatus('${t.ID}',this.value)">
-<option value="new">new</option>
-<option value="in_progress">in_progress</option>
-<option value="completed">completed</option>
-<option value="closed">closed</option>
-</select>
-`;
-
-tasks.appendChild(div);
-
-});
+  renderStats();
+  renderTasks();
 }
 
-async function changeStatus(id,status){
-await api({
-action:"updateTaskStatus",
-userId:currentUser.ID,
-taskId:id,
-status:status
-});
+function renderStats(){
+  if(!isAdmin()) return;
 
-loadTasks();
+  statAll.innerText = allTasks.length;
+  statNew.innerText = allTasks.filter(t=>t.Status==="new").length;
+  statProgress.innerText = allTasks.filter(t=>t.Status==="in_progress").length;
+  statOverdue.innerText = allTasks.filter(t=>t.Status==="overdue").length;
+  statCompleted.innerText = allTasks.filter(t=>t.Status==="completed").length;
+  statProblem.innerText = allTasks.filter(t=>t.Status==="problem").length;
 }
 
-window.onload=function(){
-let saved=localStorage.getItem("user");
-if(saved){
-currentUser=JSON.parse(saved);
-init();
+function renderTasks(){
+  if(allTasks.length === 0){
+    tasks.innerHTML = "<div class='card'>დავალება ჯერ არ არის</div>";
+    return;
+  }
+
+  allTasks.forEach(t=>{
+    const div = document.createElement("div");
+    div.className = "task";
+
+    if(t.Status === "overdue") div.classList.add("overdue");
+    if(t.Status === "completed") div.classList.add("completed");
+
+    div.innerHTML = `
+      <b>${t.Title}</b>
+      <p class="small">${t.Description}</p>
+
+      <div class="small">შემქმნელი: ${t.CreatedByName || "-"}</div>
+      <div class="small">შემსრულებელი: ${t.AssignedNames || "-"}</div>
+      <div class="small">ვადა: ${t.Deadline || "-"}</div>
+      <div class="small">პრიორიტეტი: ${t.Priority || "-"}</div>
+
+      <span class="badge">სტატუსი: ${statusName(t.Status)}</span>
+
+      ${t.CompletedByName ? `<div class="small">დაასრულა: ${t.CompletedByName}</div>` : ""}
+
+      <select onchange="changeStatus('${t.ID}',this.value)">
+        <option value="">სტატუსის შეცვლა</option>
+        <option value="new">ახალი</option>
+        <option value="in_progress">პროცესში</option>
+        <option value="problem">პრობლემა</option>
+        <option value="completed">დასრულებული</option>
+        <option value="closed">დახურვა</option>
+      </select>
+    `;
+
+    tasks.appendChild(div);
+  });
 }
+
+function statusName(status){
+  const map = {
+    new:"ახალი",
+    in_progress:"პროცესში",
+    problem:"პრობლემა",
+    completed:"დასრულებული",
+    overdue:"ვადაგადაცილებული",
+    closed:"დახურული"
+  };
+
+  return map[status] || status;
+}
+
+async function changeStatus(taskId,status){
+  if(!status) return;
+
+  const res = await api({
+    action:"updateTaskStatus",
+    userId:currentUser.ID,
+    taskId,
+    status
+  });
+
+  if(!res.success){
+    alert(res.error || "სტატუსი ვერ შეიცვალა");
+    return;
+  }
+
+  await loadTasks();
+}
+
+window.onload = function(){
+  const saved = localStorage.getItem("taskUser");
+
+  if(saved){
+    currentUser = JSON.parse(saved);
+    init();
+  }
 };
 </script>
 
