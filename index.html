@@ -2,508 +2,1000 @@
 <html lang="ka">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+<meta name="theme-color" content="#0f172a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Task System">
 <title>Task System</title>
-
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%232563eb'/%3E%3Cpath d='M28 52l14 14 30-32' stroke='white' stroke-width='10' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
 <style>
-*{
-  box-sizing:border-box;
-  font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+:root{
+  --bg:#0b1220;
+  --bg2:#111a2e;
+  --card:#1a2540;
+  --card2:#243154;
+  --border:#2a3a63;
+  --text:#f1f5f9;
+  --muted:#94a3b8;
+  --primary:#3b82f6;
+  --primary-dark:#2563eb;
+  --green:#22c55e;
+  --red:#ef4444;
+  --yellow:#f59e0b;
+  --purple:#a855f7;
+  --gray:#64748b;
+  --safe-bottom:env(safe-area-inset-bottom,0px);
+  --safe-top:env(safe-area-inset-top,0px);
 }
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+html,body{margin:0;padding:0;background:var(--bg);color:var(--text);overscroll-behavior-y:contain}
+body{padding-top:var(--safe-top);padding-bottom:calc(74px + var(--safe-bottom));min-height:100vh;font-size:15px;line-height:1.5}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit;font-size:inherit}
+input,select,textarea{font-family:inherit;font-size:16px}
+img{max-width:100%;display:block}
 
-body{
-  margin:0;
-  background:#0f172a;
-  color:#fff;
-}
+/* ============ Layout ============ */
+.app{max-width:560px;margin:0 auto;padding:14px;padding-bottom:0}
+.hidden{display:none!important}
 
-.app{
-  max-width:520px;
-  margin:auto;
-  padding:14px;
-  padding-bottom:40px;
-}
+/* ============ Auth ============ */
+.auth{min-height:calc(100vh - var(--safe-top) - 30px);display:flex;flex-direction:column;justify-content:center;padding-bottom:30px}
+.auth-logo{text-align:center;margin-bottom:24px}
+.auth-logo .icon{width:72px;height:72px;background:var(--primary);border-radius:20px;display:inline-flex;align-items:center;justify-content:center;font-size:34px;margin-bottom:12px;box-shadow:0 8px 24px rgba(59,130,246,.4)}
+.auth-logo h1{margin:0;font-size:26px;font-weight:800}
+.auth-logo p{margin:4px 0 0;color:var(--muted);font-size:14px}
+.auth-tabs{display:flex;background:var(--card);padding:5px;border-radius:14px;margin-bottom:18px;gap:4px}
+.auth-tabs button{flex:1;padding:12px;border-radius:10px;font-weight:700;color:var(--muted);transition:.2s}
+.auth-tabs button.active{background:var(--primary);color:white;box-shadow:0 4px 12px rgba(59,130,246,.3)}
 
-.card,.task,.stat{
-  background:#1e293b;
-  border:1px solid #334155;
-  padding:15px;
-  border-radius:18px;
-  margin-bottom:12px;
-}
+/* ============ Cards & inputs ============ */
+.card{background:var(--card);border:1px solid var(--border);padding:18px;border-radius:18px;margin-bottom:14px}
+.input,.select,.textarea{width:100%;padding:14px 15px;background:var(--bg2);border:1px solid var(--border);border-radius:12px;color:var(--text);outline:none;transition:.15s;margin-top:8px}
+.input:focus,.select:focus,.textarea:focus{border-color:var(--primary);background:var(--card)}
+.textarea{min-height:90px;resize:vertical}
+.label{display:block;margin-top:14px;font-size:13px;color:var(--muted);font-weight:600}
 
-h2,h3,h4,p{
-  margin-top:0;
-}
+.btn{width:100%;padding:15px;background:var(--primary);color:white;border-radius:13px;font-weight:700;margin-top:14px;transition:.15s;font-size:15px}
+.btn:active{transform:scale(.98);background:var(--primary-dark)}
+.btn.secondary{background:var(--card2);color:var(--text)}
+.btn.danger{background:var(--red)}
+.btn.success{background:var(--green)}
+.btn.small{padding:8px 14px;width:auto;margin:0;font-size:13px;border-radius:10px}
+.btn:disabled{opacity:.5;pointer-events:none}
 
-input,select,textarea{
-  width:100%;
-  padding:13px;
-  margin-top:8px;
-  border-radius:12px;
-  border:1px solid #475569;
-  background:#334155;
-  color:#fff;
-  font-size:15px;
-}
+.alert{padding:12px 14px;border-radius:11px;margin-top:12px;font-size:14px}
+.alert.error{background:rgba(239,68,68,.15);color:#fca5a5;border:1px solid rgba(239,68,68,.3)}
+.alert.success{background:rgba(34,197,94,.15);color:#86efac;border:1px solid rgba(34,197,94,.3)}
 
-textarea{
-  min-height:90px;
-  resize:vertical;
-}
+/* ============ Topbar ============ */
+.topbar{display:flex;align-items:center;gap:12px;padding:14px 16px;background:var(--card);border-radius:16px;margin-bottom:14px}
+.avatar{width:42px;height:42px;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:17px;color:white;flex-shrink:0}
+.topbar .info{flex:1;min-width:0}
+.topbar .info b{display:block;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.topbar .info span{font-size:12px;color:var(--muted)}
+.role-badge{display:inline-block;padding:2px 8px;background:var(--purple);color:white;border-radius:8px;font-size:10px;font-weight:700;margin-left:6px;text-transform:uppercase}
+.role-badge.admin{background:var(--primary)}
 
-button{
-  width:100%;
-  padding:14px;
-  margin-top:10px;
-  border:none;
-  border-radius:13px;
-  font-weight:800;
-  background:#2563eb;
-  color:#fff;
-  font-size:15px;
-}
+/* ============ Stats ============ */
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
+.stat{background:var(--card);padding:14px 10px;border-radius:14px;border:1px solid var(--border);text-align:center}
+.stat .num{font-size:24px;font-weight:800;display:block}
+.stat .lbl{font-size:11px;color:var(--muted);margin-top:4px;font-weight:600}
+.stat.new .num{color:var(--primary)}
+.stat.progress .num{color:var(--yellow)}
+.stat.overdue .num{color:var(--red)}
+.stat.completed .num{color:var(--green)}
+.stat.problem .num{color:var(--purple)}
 
-button.red{
-  background:#ef4444;
-}
+/* ============ Filter chips ============ */
+.filters{display:flex;gap:8px;overflow-x:auto;padding-bottom:6px;margin-bottom:12px;scrollbar-width:none}
+.filters::-webkit-scrollbar{display:none}
+.chip{flex-shrink:0;padding:8px 14px;background:var(--card);border:1px solid var(--border);border-radius:999px;font-size:13px;font-weight:600;color:var(--muted);transition:.15s}
+.chip.active{background:var(--primary);color:white;border-color:var(--primary)}
+.chip .badge{display:inline-block;background:rgba(255,255,255,.25);padding:1px 7px;border-radius:8px;margin-left:6px;font-size:11px;font-weight:700}
 
-.topbar{
-  display:flex;
-  gap:10px;
-  align-items:center;
-  justify-content:space-between;
-  margin-bottom:12px;
-}
+/* ============ Task cards ============ */
+.task{background:var(--card);border:1px solid var(--border);padding:15px;border-radius:16px;margin-bottom:10px;cursor:pointer;transition:.15s;position:relative;overflow:hidden}
+.task:active{transform:scale(.98)}
+.task::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--gray)}
+.task.s-new::before{background:var(--primary)}
+.task.s-in_progress::before{background:var(--yellow)}
+.task.s-problem::before{background:var(--purple)}
+.task.s-overdue::before{background:var(--red)}
+.task.s-completed::before{background:var(--green)}
+.task.s-closed::before{background:var(--gray)}
+.task .title{font-weight:700;font-size:15px;margin-bottom:6px;padding-left:10px;display:flex;align-items:flex-start;gap:6px}
+.task .desc{font-size:13px;color:var(--muted);padding-left:10px;margin-bottom:8px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.task .meta{display:flex;gap:6px;flex-wrap:wrap;padding-left:10px;font-size:11px}
+.task .pill{padding:3px 8px;background:var(--bg2);border-radius:6px;color:var(--muted);font-weight:600;display:inline-flex;align-items:center;gap:4px}
+.task .pill.deadline.late{background:rgba(239,68,68,.2);color:#fca5a5}
+.task .pill.priority-high,.task .pill.priority-urgent{background:rgba(239,68,68,.15);color:#fca5a5}
+.task .pill.priority-low{background:rgba(100,116,139,.2);color:var(--muted)}
 
-.topbar button{
-  width:auto;
-  padding:10px 14px;
-  margin:0;
-}
+.empty{text-align:center;padding:40px 20px;color:var(--muted);background:var(--card);border-radius:16px;border:1px dashed var(--border)}
+.empty .em{font-size:42px;margin-bottom:8px}
 
-.small{
-  font-size:13px;
-  color:#94a3b8;
-  line-height:1.5;
-}
+/* ============ Multi-select assignees ============ */
+.assignees{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;max-height:180px;overflow-y:auto;padding:4px}
+.assignee-chip{padding:8px 12px;background:var(--bg2);border:2px solid var(--border);border-radius:10px;font-size:13px;font-weight:600;display:inline-flex;align-items:center;gap:6px;transition:.15s}
+.assignee-chip.selected{background:var(--primary);border-color:var(--primary);color:white}
+.assignee-chip .check{width:16px;height:16px;border-radius:50%;border:2px solid currentColor;display:inline-flex;align-items:center;justify-content:center;font-size:10px}
+.assignee-chip.selected .check{background:white;color:var(--primary);border-color:white}
 
-.task.overdue{
-  border:2px solid #ef4444;
-  background:#2a1820;
-}
+/* ============ Bottom nav ============ */
+.bottomnav{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px solid var(--border);display:flex;padding:6px 0 calc(6px + var(--safe-bottom));z-index:50;backdrop-filter:blur(12px);background:rgba(26,37,64,.95)}
+.bottomnav button{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 0;color:var(--muted);font-size:11px;font-weight:600;transition:.15s}
+.bottomnav button.active{color:var(--primary)}
+.bottomnav button .nav-icon{font-size:22px;line-height:1}
 
-.task.completed{
-  border:2px solid #22c55e;
-}
+/* ============ Modal ============ */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:100;display:flex;align-items:flex-end;animation:fadeIn .2s;backdrop-filter:blur(4px)}
+.modal{background:var(--bg);width:100%;max-width:560px;margin:0 auto;border-radius:24px 24px 0 0;max-height:92vh;overflow-y:auto;padding:8px 16px calc(20px + var(--safe-bottom));animation:slideUp .25s;-webkit-overflow-scrolling:touch}
+.modal-handle{width:42px;height:5px;background:var(--card2);border-radius:3px;margin:6px auto 16px}
+.modal h3{margin:0 0 4px;font-size:18px}
+.modal-close{position:absolute;top:14px;right:14px;width:34px;height:34px;background:var(--card);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--muted)}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
 
-.badge{
-  display:inline-block;
-  padding:5px 9px;
-  border-radius:999px;
-  font-size:12px;
-  font-weight:800;
-  background:#334155;
-  margin-top:6px;
-}
+.detail-section{padding:14px 0;border-bottom:1px solid var(--border)}
+.detail-section:last-child{border-bottom:none}
+.detail-section h4{margin:0 0 8px;font-size:13px;color:var(--muted);text-transform:uppercase;font-weight:700;letter-spacing:.5px}
 
-.stats{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:10px;
-  margin-bottom:12px;
-}
+.status-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:8px}
+.status-grid button{padding:11px;background:var(--card);border:1px solid var(--border);border-radius:10px;font-size:13px;font-weight:600;color:var(--muted)}
+.status-grid button.s-new{color:var(--primary);border-color:rgba(59,130,246,.4)}
+.status-grid button.s-in_progress{color:var(--yellow);border-color:rgba(245,158,11,.4)}
+.status-grid button.s-problem{color:var(--purple);border-color:rgba(168,85,247,.4)}
+.status-grid button.s-completed{color:var(--green);border-color:rgba(34,197,94,.4)}
+.status-grid button.s-closed{color:var(--red);border-color:rgba(239,68,68,.4)}
 
-.stat{
-  margin:0;
-  text-align:center;
-}
+/* ============ Comments ============ */
+.comment{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:11px 13px;margin-top:8px}
+.comment .who{font-size:12px;color:var(--muted);margin-bottom:4px;display:flex;justify-content:space-between}
+.comment .who b{color:var(--text);font-size:13px;font-weight:700}
+.comment .text{font-size:14px;white-space:pre-wrap;word-break:break-word}
 
-.stat b{
-  display:block;
-  font-size:24px;
-  margin-top:5px;
-}
+.comment-input{display:flex;gap:8px;margin-top:10px;align-items:flex-end}
+.comment-input textarea{flex:1;min-height:44px;max-height:120px;padding:11px;background:var(--card);border:1px solid var(--border);border-radius:11px;color:var(--text);outline:none;resize:none;font-size:14px}
+.comment-input button{width:44px;height:44px;background:var(--primary);border-radius:11px;color:white;flex-shrink:0;font-size:18px}
 
-.hidden{
-  display:none;
-}
+/* ============ Attachments ============ */
+.att-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
+.att{aspect-ratio:1;background:var(--card);border-radius:10px;overflow:hidden;border:1px solid var(--border);position:relative;cursor:pointer}
+.att img{width:100%;height:100%;object-fit:cover}
+.att.upload{display:flex;align-items:center;justify-content:center;flex-direction:column;color:var(--muted);font-size:11px;gap:4px;border:2px dashed var(--border)}
+.att.upload .ic{font-size:26px}
+.att .name{position:absolute;bottom:0;left:0;right:0;padding:3px 6px;background:rgba(0,0,0,.7);color:white;font-size:9px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
-hr{
-  border:none;
-  border-top:1px solid #334155;
-  margin:18px 0;
-}
+/* ============ Users mgmt ============ */
+.user-row{display:flex;align-items:center;gap:10px;padding:12px;background:var(--card);border:1px solid var(--border);border-radius:12px;margin-bottom:8px}
+.user-row .info{flex:1;min-width:0}
+.user-row .info b{display:block;font-size:14px}
+.user-row .info span{font-size:12px;color:var(--muted)}
+.user-row select{padding:7px 10px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:12px}
 
-#msg{
-  margin-top:10px;
-  color:#fca5a5;
+/* ============ Loader ============ */
+.loader{display:inline-block;width:18px;height:18px;border:2.5px solid rgba(255,255,255,.3);border-top-color:white;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-screen{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px;z-index:200}
+.loading-screen .ls-loader{width:42px;height:42px;border:4px solid var(--border);border-top-color:var(--primary);border-radius:50%;animation:spin .8s linear infinite}
+
+.toast{position:fixed;bottom:calc(90px + var(--safe-bottom));left:50%;transform:translateX(-50%);background:var(--card);border:1px solid var(--border);padding:12px 20px;border-radius:12px;font-size:14px;box-shadow:0 6px 20px rgba(0,0,0,.4);z-index:300;animation:toastIn .25s;max-width:90%}
+.toast.error{border-color:var(--red);color:#fca5a5}
+.toast.success{border-color:var(--green);color:#86efac}
+@keyframes toastIn{from{opacity:0;transform:translate(-50%,20px)}to{opacity:1;transform:translate(-50%,0)}}
+
+.search{position:relative;margin-bottom:10px}
+.search input{width:100%;padding:11px 13px 11px 40px;background:var(--card);border:1px solid var(--border);border-radius:12px;color:var(--text);outline:none;font-size:14px}
+.search::before{content:"";position:absolute;left:14px;top:50%;transform:translateY(-50%);width:14px;height:14px;border:2px solid var(--muted);border-radius:50%}
+.search::after{content:"";position:absolute;left:25px;top:54%;width:7px;height:2px;background:var(--muted);transform:rotate(45deg)}
+
+.section-header{display:flex;align-items:center;justify-content:space-between;margin:6px 4px 10px}
+.section-header h3{margin:0;font-size:17px;font-weight:700}
+.section-header .count{font-size:12px;color:var(--muted)}
+
+/* image lightbox */
+.lightbox{position:fixed;inset:0;background:rgba(0,0,0,.95);z-index:400;display:flex;align-items:center;justify-content:center;padding:20px}
+.lightbox img{max-width:100%;max-height:100%;border-radius:8px}
+.lightbox .lb-close{position:absolute;top:calc(20px + var(--safe-top));right:20px;width:40px;height:40px;background:rgba(255,255,255,.15);border-radius:50%;color:white;font-size:20px;display:flex;align-items:center;justify-content:center}
+
+@media(min-width:600px){
+  .stats{grid-template-columns:repeat(6,1fr)}
 }
 </style>
 </head>
-
 <body>
 
-<div class="app">
-
-  <div id="auth">
-    <div class="card">
-      <h2>Task System</h2>
-      <p class="small">თანამშრომლების დავალებების მართვის სისტემა</p>
-
-      <h4>შესვლა</h4>
-      <input id="loginPhone" placeholder="ტელეფონი / admin">
-      <input id="loginPassword" placeholder="პაროლი / 1234" type="password">
-      <button onclick="login()">შესვლა</button>
-
-      <hr>
-
-      <h4>რეგისტრაცია</h4>
-      <input id="regName" placeholder="სახელი და გვარი">
-      <input id="regPhone" placeholder="ტელეფონი">
-      <input id="regPassword" placeholder="პაროლი" type="password">
-      <input id="regPosition" placeholder="პოზიცია">
-      <button onclick="registerUser()">რეგისტრაცია</button>
-
-      <p id="msg"></p>
-    </div>
-  </div>
-
-  <div id="dash" class="hidden">
-
-    <div class="topbar">
-      <div>
-        <h3 id="username"></h3>
-        <div id="userrole" class="small"></div>
-      </div>
-      <button class="red" onclick="logout()">გასვლა</button>
-    </div>
-
-    <div id="adminStats" class="hidden">
-      <h4>ადმინის სტატისტიკა</h4>
-
-      <div class="stats">
-        <div class="stat">
-          სულ
-          <b id="statAll">0</b>
-        </div>
-        <div class="stat">
-          ახალი
-          <b id="statNew">0</b>
-        </div>
-        <div class="stat">
-          პროცესში
-          <b id="statProgress">0</b>
-        </div>
-        <div class="stat">
-          ვადაგადაცილებული
-          <b id="statOverdue">0</b>
-        </div>
-        <div class="stat">
-          დასრულებული
-          <b id="statCompleted">0</b>
-        </div>
-        <div class="stat">
-          პრობლემა
-          <b id="statProblem">0</b>
-        </div>
-      </div>
-    </div>
-
-    <div class="card">
-      <h4>დავალების შექმნა</h4>
-
-      <input id="title" placeholder="დავალების სათაური">
-      <textarea id="desc" placeholder="დავალების აღწერა"></textarea>
-
-      <label class="small">შემსრულებელი</label>
-      <select id="users"></select>
-
-      <label class="small">პრიორიტეტი</label>
-      <select id="priority">
-        <option value="low">დაბალი</option>
-        <option value="normal" selected>ჩვეულებრივი</option>
-        <option value="high">მაღალი</option>
-        <option value="urgent">სასწრაფო</option>
-      </select>
-
-      <label class="small">შესრულების ვადა</label>
-      <input id="deadline" type="datetime-local">
-
-      <button onclick="createTask()">დავალების შექმნა</button>
-    </div>
-
-    <h4>დავალებები</h4>
-    <div id="tasks"></div>
-
-  </div>
-
+<!-- Loading screen -->
+<div id="loadingScreen" class="loading-screen">
+  <div class="ls-loader"></div>
+  <div style="color:var(--muted);font-size:13px">იტვირთება...</div>
 </div>
 
+<!-- Auth view -->
+<div id="authView" class="hidden">
+  <div class="app">
+    <div class="auth">
+      <div class="auth-logo">
+        <div class="icon">✓</div>
+        <h1>Task System</h1>
+        <p>თანამშრომლების დავალებების მართვა</p>
+      </div>
+
+      <div class="auth-tabs">
+        <button id="tabLogin" class="active" onclick="switchAuthTab('login')">შესვლა</button>
+        <button id="tabReg" onclick="switchAuthTab('reg')">რეგისტრაცია</button>
+      </div>
+
+      <!-- Login form -->
+      <div id="loginForm" class="card">
+        <input class="input" id="loginPhone" placeholder="ტელეფონი (ან admin)" autocomplete="username">
+        <input class="input" id="loginPass" placeholder="პაროლი" type="password" autocomplete="current-password">
+        <button class="btn" onclick="doLogin()" id="loginBtn">შესვლა</button>
+        <div id="loginAlert"></div>
+      </div>
+
+      <!-- Register form -->
+      <div id="regForm" class="card hidden">
+        <input class="input" id="regName" placeholder="სახელი და გვარი">
+        <input class="input" id="regPhone" placeholder="ტელეფონის ნომერი" inputmode="tel">
+        <input class="input" id="regPosition" placeholder="პოზიცია (მაგ: გაყიდვების მენეჯერი)">
+        <input class="input" id="regPass" placeholder="პაროლი (მინ. 4 სიმბოლო)" type="password">
+        <button class="btn" onclick="doRegister()" id="regBtn">რეგისტრაცია</button>
+        <div id="regAlert"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Main app -->
+<div id="mainView" class="hidden">
+  <div class="app">
+
+    <!-- Topbar -->
+    <div class="topbar">
+      <div class="avatar" id="userAvatar">?</div>
+      <div class="info">
+        <b id="userName"></b>
+        <span><span id="userPos"></span><span class="role-badge" id="userBadge"></span></span>
+      </div>
+      <button class="btn small secondary" onclick="logout()">გასვლა</button>
+    </div>
+
+    <!-- ===== Tasks tab ===== -->
+    <div id="tabTasks">
+      <div id="adminStatsBar" class="hidden">
+        <div class="stats">
+          <div class="stat new"><span class="num" id="sNew">0</span><div class="lbl">ახალი</div></div>
+          <div class="stat progress"><span class="num" id="sProg">0</span><div class="lbl">პროცესში</div></div>
+          <div class="stat overdue"><span class="num" id="sOver">0</span><div class="lbl">ვადაგადაცილ.</div></div>
+          <div class="stat problem"><span class="num" id="sProb">0</span><div class="lbl">პრობლემა</div></div>
+          <div class="stat completed"><span class="num" id="sComp">0</span><div class="lbl">დასრულებული</div></div>
+          <div class="stat"><span class="num" id="sAll">0</span><div class="lbl">სულ</div></div>
+        </div>
+      </div>
+
+      <div class="search">
+        <input id="searchInput" placeholder="ძებნა სათაურით ან აღწერით..." oninput="renderTasks()">
+      </div>
+
+      <div class="filters" id="filterChips"></div>
+
+      <div id="tasksList"></div>
+    </div>
+
+    <!-- ===== Create tab ===== -->
+    <div id="tabCreate" class="hidden">
+      <div class="section-header"><h3>ახალი დავალება</h3></div>
+      <div class="card">
+        <input class="input" id="ntTitle" placeholder="დავალების სათაური" maxlength="200">
+        <textarea class="textarea" id="ntDesc" placeholder="დეტალური აღწერა"></textarea>
+
+        <div class="label">შემსრულებელი/ები (აირჩიე რამდენიმე)</div>
+        <div id="ntAssignees" class="assignees"></div>
+
+        <div class="label">პრიორიტეტი</div>
+        <select class="select" id="ntPriority">
+          <option value="low">დაბალი</option>
+          <option value="normal" selected>ჩვეულებრივი</option>
+          <option value="high">მაღალი</option>
+          <option value="urgent">სასწრაფო</option>
+        </select>
+
+        <div class="label">შესრულების ვადა</div>
+        <input class="input" id="ntDeadline" type="datetime-local">
+
+        <div class="label">📷 ფოტოები (სურვილისამებრ)</div>
+        <div class="att-grid" id="ntAttGrid"></div>
+        <input type="file" id="ntFileInput" accept="image/*" multiple capture="environment" style="display:none" onchange="handleNewTaskFiles(event)">
+
+        <button class="btn" onclick="submitTask()" id="ntSubmit">დავალების შექმნა</button>
+        <div id="ntAlert"></div>
+        <div id="ntProgress" style="margin-top:10px;font-size:13px;color:var(--muted);text-align:center"></div>
+      </div>
+    </div>
+
+    <!-- ===== Stats tab ===== -->
+    <div id="tabStats" class="hidden">
+      <div class="section-header"><h3>სტატისტიკა</h3></div>
+      <div class="stats">
+        <div class="stat new"><span class="num" id="s2New">0</span><div class="lbl">ახალი</div></div>
+        <div class="stat progress"><span class="num" id="s2Prog">0</span><div class="lbl">პროცესში</div></div>
+        <div class="stat overdue"><span class="num" id="s2Over">0</span><div class="lbl">ვადაგადაცილ.</div></div>
+        <div class="stat problem"><span class="num" id="s2Prob">0</span><div class="lbl">პრობლემა</div></div>
+        <div class="stat completed"><span class="num" id="s2Comp">0</span><div class="lbl">დასრულებული</div></div>
+        <div class="stat"><span class="num" id="s2All">0</span><div class="lbl">აქტიური</div></div>
+      </div>
+      <div class="card" style="text-align:center">
+        <div style="font-size:12px;color:var(--muted)">დახურული დავალებები</div>
+        <div style="font-size:36px;font-weight:800;margin-top:4px" id="s2Closed">0</div>
+      </div>
+    </div>
+
+    <!-- ===== Users tab (super_admin) ===== -->
+    <div id="tabUsers" class="hidden">
+      <div class="section-header"><h3>მომხმარებლები</h3><span class="count" id="usersCount"></span></div>
+      <div id="usersList"></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Bottom nav -->
+<nav class="bottomnav hidden" id="bottomNav">
+  <button data-tab="tasks" class="active" onclick="switchTab('tasks')">
+    <span class="nav-icon">📋</span>დავალებები
+  </button>
+  <button data-tab="create" onclick="switchTab('create')">
+    <span class="nav-icon">➕</span>შექმნა
+  </button>
+  <button data-tab="stats" onclick="switchTab('stats')" id="navStats">
+    <span class="nav-icon">📊</span>სტატისტიკა
+  </button>
+  <button data-tab="users" onclick="switchTab('users')" id="navUsers">
+    <span class="nav-icon">👥</span>იუზერები
+  </button>
+</nav>
+
+<!-- Task detail modal placeholder -->
+<div id="modalContainer"></div>
+
 <script>
+// ============================================
+// Config
+// ============================================
 const API = "https://script.google.com/macros/s/AKfycbwkkhmujGNq5iF-esZVKwR2hkMRApMuSzFvr0HKdqJ1uToJvOOvgC0JVA17iMQu4Ler/exec";
+const STORAGE_KEY = "taskSystemUser";
 
-let currentUser = null;
+// ============================================
+// State
+// ============================================
+let user = null;
+let allUsers = [];
 let allTasks = [];
+let currentFilter = "all";
+let currentTab = "tasks";
 
-async function api(data){
-  try{
-    const res = await fetch(API,{
-      method:"POST",
-      body:JSON.stringify(data)
+// ============================================
+// API
+// ============================================
+async function api(payload) {
+  try {
+    const res = await fetch(API, {
+      method: "POST",
+      body: JSON.stringify(payload),
+      redirect: "follow"
     });
     return await res.json();
-  }catch(e){
-    return {success:false,error:"სერვერთან კავშირი ვერ მოხერხდა"};
+  } catch (e) {
+    return { success: false, error: "სერვერთან კავშირი ვერ მოხერხდა" };
   }
 }
 
-function isAdmin(){
-  return currentUser &&
-    (currentUser.Role === "super_admin" || currentUser.Role === "admin");
+// ============================================
+// Helpers
+// ============================================
+function $(id) { return document.getElementById(id); }
+function show(id) { $(id).classList.remove("hidden"); }
+function hide(id) { $(id).classList.add("hidden"); }
+function isAdmin() { return user && (user.Role === "super_admin" || user.Role === "admin"); }
+function isSuperAdmin() { return user && user.Role === "super_admin"; }
+
+function toast(msg, type = "") {
+  const t = document.createElement("div");
+  t.className = "toast " + type;
+  t.innerText = msg;
+  document.body.appendChild(t);
+  setTimeout(() => t.style.opacity = "0", 2400);
+  setTimeout(() => t.remove(), 2700);
 }
 
-async function login(){
-  const phone = document.getElementById("loginPhone").value.trim();
-  const password = document.getElementById("loginPassword").value.trim();
-
-  if(!phone || !password){
-    msg.innerText = "ტელეფონი და პაროლი აუცილებელია";
-    return;
-  }
-
-  const res = await api({
-    action:"login",
-    phone,
-    password
-  });
-
-  if(!res.success){
-    msg.innerText = res.error || "შესვლა ვერ შესრულდა";
-    return;
-  }
-
-  currentUser = res.user;
-  localStorage.setItem("taskUser",JSON.stringify(currentUser));
-  init();
+function alertBox(elId, msg, type = "error") {
+  $(elId).innerHTML = msg ? `<div class="alert ${type}">${escapeHtml(msg)}</div>` : "";
 }
 
-async function registerUser(){
-  const name = document.getElementById("regName").value.trim();
-  const phone = document.getElementById("regPhone").value.trim();
-  const password = document.getElementById("regPassword").value.trim();
-  const position = document.getElementById("regPosition").value.trim();
-
-  if(!name || !phone || !password || !position){
-    msg.innerText = "ყველა ველის შევსება აუცილებელია";
-    return;
-  }
-
-  const res = await api({
-    action:"register",
-    name,
-    phone,
-    password,
-    position
-  });
-
-  if(!res.success){
-    msg.innerText = res.error || "რეგისტრაცია ვერ შესრულდა";
-    return;
-  }
-
-  msg.style.color = "#86efac";
-  msg.innerText = "რეგისტრაცია წარმატებით დასრულდა. ახლა შედი სისტემაში.";
-  document.getElementById("loginPhone").value = phone;
+function escapeHtml(s) {
+  if (s == null) return "";
+  return String(s)
+    .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;").replace(/'/g, "&#39;");
 }
 
-function logout(){
-  localStorage.removeItem("taskUser");
+function initials(name) {
+  if (!name) return "?";
+  const parts = String(name).trim().split(/\s+/);
+  return ((parts[0]||"")[0] + (parts[1]||"")[0]).toUpperCase() || "?";
+}
+
+const STATUS_LABEL = {
+  new: "ახალი",
+  in_progress: "პროცესში",
+  problem: "პრობლემა",
+  completed: "დასრულებული",
+  overdue: "ვადაგადაცილებული",
+  closed: "დახურული"
+};
+const PRIORITY_LABEL = {
+  low: "დაბალი",
+  normal: "ჩვეულებრივი",
+  high: "მაღალი",
+  urgent: "სასწრაფო"
+};
+
+// ============================================
+// Boot
+// ============================================
+window.addEventListener("DOMContentLoaded", async () => {
+  const saved = localStorage.getItem(STORAGE_KEY);
+  if (saved) {
+    try {
+      user = JSON.parse(saved);
+      await enterApp();
+      hide("loadingScreen");
+      return;
+    } catch (e) {}
+  }
+  hide("loadingScreen");
+  show("authView");
+});
+
+// ============================================
+// Auth
+// ============================================
+function switchAuthTab(t) {
+  if (t === "login") {
+    $("tabLogin").classList.add("active");
+    $("tabReg").classList.remove("active");
+    show("loginForm"); hide("regForm");
+  } else {
+    $("tabReg").classList.add("active");
+    $("tabLogin").classList.remove("active");
+    show("regForm"); hide("loginForm");
+  }
+}
+
+async function doLogin() {
+  const phone = $("loginPhone").value.trim();
+  const password = $("loginPass").value.trim();
+  if (!phone || !password) {
+    alertBox("loginAlert", "შეავსე ორივე ველი");
+    return;
+  }
+  const btn = $("loginBtn");
+  btn.disabled = true; btn.innerHTML = '<span class="loader"></span>';
+  const res = await api({ action: "login", phone, password });
+  btn.disabled = false; btn.innerHTML = "შესვლა";
+  if (!res.success) { alertBox("loginAlert", res.error || "შესვლა ვერ მოხერხდა"); return; }
+  user = res.user;
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(user));
+  alertBox("loginAlert", "");
+  await enterApp();
+}
+
+async function doRegister() {
+  const name = $("regName").value.trim();
+  const phone = $("regPhone").value.trim();
+  const position = $("regPosition").value.trim();
+  const password = $("regPass").value.trim();
+  if (!name || !phone || !position || !password) {
+    alertBox("regAlert", "ყველა ველი აუცილებელია");
+    return;
+  }
+  const btn = $("regBtn");
+  btn.disabled = true; btn.innerHTML = '<span class="loader"></span>';
+  const res = await api({ action: "register", name, phone, position, password });
+  btn.disabled = false; btn.innerHTML = "რეგისტრაცია";
+  if (!res.success) { alertBox("regAlert", res.error || "რეგისტრაცია ვერ მოხერხდა"); return; }
+  alertBox("regAlert", "რეგისტრაცია წარმატებით დასრულდა! გადადი შესვლაზე.", "success");
+  $("regName").value = $("regPhone").value = $("regPosition").value = $("regPass").value = "";
+  setTimeout(() => switchAuthTab("login"), 800);
+  $("loginPhone").value = phone;
+}
+
+function logout() {
+  if (!confirm("ნამდვილად გსურს გასვლა?")) return;
+  localStorage.removeItem(STORAGE_KEY);
+  user = null;
   location.reload();
 }
 
-async function init(){
-  document.getElementById("auth").style.display = "none";
-  document.getElementById("dash").classList.remove("hidden");
-
-  username.innerText = currentUser.Name;
-  userrole.innerText = currentUser.Position + " / " + currentUser.Role;
-
-  if(isAdmin()){
-    adminStats.classList.remove("hidden");
-  }else{
-    adminStats.classList.add("hidden");
+// ============================================
+// Enter app
+// ============================================
+async function enterApp() {
+  hide("authView");
+  show("mainView");
+  show("bottomNav");
+  $("userName").innerText = user.Name;
+  $("userPos").innerText = user.Position || "";
+  $("userAvatar").innerText = initials(user.Name);
+  const badge = $("userBadge");
+  if (user.Role === "super_admin") {
+    badge.innerText = "Super Admin"; badge.className = "role-badge";
+  } else if (user.Role === "admin") {
+    badge.innerText = "Admin"; badge.className = "role-badge admin";
+  } else {
+    badge.innerText = ""; badge.className = "";
   }
+
+  if (isAdmin()) {
+    show("adminStatsBar");
+    show("navStats");
+  } else {
+    hide("adminStatsBar");
+    hide("navStats");
+  }
+  if (isSuperAdmin()) show("navUsers"); else hide("navUsers");
 
   await loadUsers();
   await loadTasks();
+  buildFilterChips();
 }
 
-async function loadUsers(){
-  const res = await api({
-    action:"getUsers",
-    userId:currentUser.ID
+// ============================================
+// Tabs
+// ============================================
+function switchTab(t) {
+  currentTab = t;
+  ["tasks","create","stats","users"].forEach(name => {
+    const el = $("tab" + name.charAt(0).toUpperCase() + name.slice(1));
+    if (el) el.classList.toggle("hidden", name !== t);
   });
-
-  users.innerHTML = "";
-
-  if(!res.success){
-    users.innerHTML = "<option>თანამშრომლები ვერ ჩაიტვირთა</option>";
-    return;
+  document.querySelectorAll(".bottomnav button").forEach(b => {
+    b.classList.toggle("active", b.dataset.tab === t);
+  });
+  if (t === "tasks") loadTasks();
+  if (t === "stats") loadStats();
+  if (t === "users") loadUsersList();
+  if (t === "create") {
+    renderAssigneePicker();
+    setDefaultDeadline();
   }
+}
 
-  res.users.forEach(u=>{
-    const opt = document.createElement("option");
-    opt.value = u.ID;
-    opt.innerText = u.Name + " — " + u.Position;
-    users.appendChild(opt);
+function setDefaultDeadline() {
+  if ($("ntDeadline").value) return;
+  const d = new Date();
+  d.setDate(d.getDate() + 1);
+  d.setHours(18, 0, 0, 0);
+  const pad = n => String(n).padStart(2, "0");
+  $("ntDeadline").value = `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+// ============================================
+// Users
+// ============================================
+async function loadUsers() {
+  const res = await api({ action: "getUsers", userId: user.ID });
+  if (res.success) allUsers = res.users || [];
+  renderAssigneePicker();
+}
+
+function renderAssigneePicker(selectedIds = []) {
+  const box = $("ntAssignees");
+  if (!box) return;
+  box.innerHTML = "";
+  allUsers.filter(u => u.ID !== user.ID || true).forEach(u => {
+    const sel = selectedIds.indexOf(u.ID) >= 0;
+    const chip = document.createElement("div");
+    chip.className = "assignee-chip" + (sel ? " selected" : "");
+    chip.dataset.id = u.ID;
+    chip.innerHTML = `<span class="check">${sel ? "✓" : ""}</span> ${escapeHtml(u.Name)}`;
+    chip.onclick = () => {
+      chip.classList.toggle("selected");
+      const isSel = chip.classList.contains("selected");
+      chip.querySelector(".check").innerText = isSel ? "✓" : "";
+    };
+    box.appendChild(chip);
   });
 }
 
-async function createTask(){
-  const titleVal = title.value.trim();
-  const descVal = desc.value.trim();
-  const assigned = users.value;
-  const priorityVal = priority.value;
-  const deadlineVal = deadline.value;
-
-  if(!titleVal || !descVal || !assigned || !deadlineVal){
-    alert("ყველა ველის შევსება აუცილებელია");
-    return;
-  }
-
-  const res = await api({
-    action:"createTask",
-    userId:currentUser.ID,
-    title:titleVal,
-    description:descVal,
-    assignedTo:[assigned],
-    priority:priorityVal,
-    deadline:deadlineVal
-  });
-
-  if(!res.success){
-    alert(res.error || "დავალება ვერ შეიქმნა");
-    return;
-  }
-
-  title.value = "";
-  desc.value = "";
-  deadline.value = "";
-
-  await loadTasks();
+function getSelectedAssignees() {
+  return Array.from(document.querySelectorAll("#ntAssignees .assignee-chip.selected"))
+    .map(c => c.dataset.id);
 }
 
-async function loadTasks(){
-  const res = await api({
-    action:"getTasks",
-    userId:currentUser.ID
+async function loadUsersList() {
+  await loadUsers();
+  const list = $("usersList");
+  list.innerHTML = "";
+  $("usersCount").innerText = allUsers.length + " მომხმარებელი";
+  allUsers.forEach(u => {
+    const row = document.createElement("div");
+    row.className = "user-row";
+    row.innerHTML = `
+      <div class="avatar" style="width:38px;height:38px;font-size:14px">${initials(u.Name)}</div>
+      <div class="info">
+        <b>${escapeHtml(u.Name)}</b>
+        <span>${escapeHtml(u.Phone)} · ${escapeHtml(u.Position || "")}</span>
+      </div>
+    `;
+    if (u.ID !== user.ID) {
+      const sel = document.createElement("select");
+      sel.innerHTML = `
+        <option value="employee" ${u.Role==="employee"?"selected":""}>თანამშრომელი</option>
+        <option value="admin" ${u.Role==="admin"?"selected":""}>ადმინი</option>
+        <option value="super_admin" ${u.Role==="super_admin"?"selected":""}>Super Admin</option>
+      `;
+      sel.onchange = async () => {
+        const r = await api({ action: "updateUserRole", userId: user.ID, targetUserId: u.ID, newRole: sel.value });
+        toast(r.success ? "როლი განახლდა" : (r.error || "შეცდომა"), r.success ? "success" : "error");
+      };
+      row.appendChild(sel);
+    } else {
+      const tag = document.createElement("span");
+      tag.style.cssText = "font-size:11px;color:var(--muted);padding:6px 10px";
+      tag.innerText = "შენ";
+      row.appendChild(tag);
+    }
+    list.appendChild(row);
   });
+}
 
-  tasks.innerHTML = "";
-
-  if(!res.success){
-    tasks.innerHTML = "<div class='card'>დავალებები ვერ ჩაიტვირთა</div>";
+// ============================================
+// Tasks
+// ============================================
+async function loadTasks() {
+  const res = await api({ action: "getTasks", userId: user.ID });
+  if (!res.success) {
+    $("tasksList").innerHTML = `<div class="empty"><div class="em">⚠️</div>${escapeHtml(res.error || "ჩატვირთვა ვერ მოხერხდა")}</div>`;
     return;
   }
-
   allTasks = res.tasks || [];
-
-  renderStats();
+  updateAdminStats();
+  buildFilterChips();
   renderTasks();
 }
 
-function renderStats(){
-  if(!isAdmin()) return;
-
-  statAll.innerText = allTasks.length;
-  statNew.innerText = allTasks.filter(t=>t.Status==="new").length;
-  statProgress.innerText = allTasks.filter(t=>t.Status==="in_progress").length;
-  statOverdue.innerText = allTasks.filter(t=>t.Status==="overdue").length;
-  statCompleted.innerText = allTasks.filter(t=>t.Status==="completed").length;
-  statProblem.innerText = allTasks.filter(t=>t.Status==="problem").length;
+function updateAdminStats() {
+  if (!isAdmin()) return;
+  const counts = countByStatus();
+  $("sNew").innerText = counts.new;
+  $("sProg").innerText = counts.in_progress;
+  $("sOver").innerText = counts.overdue;
+  $("sProb").innerText = counts.problem;
+  $("sComp").innerText = counts.completed;
+  $("sAll").innerText = allTasks.length;
 }
 
-function renderTasks(){
-  if(allTasks.length === 0){
-    tasks.innerHTML = "<div class='card'>დავალება ჯერ არ არის</div>";
+function countByStatus() {
+  const c = { all: allTasks.length, new: 0, in_progress: 0, problem: 0, overdue: 0, completed: 0, closed: 0 };
+  allTasks.forEach(t => { if (c[t.Status] !== undefined) c[t.Status]++; });
+  return c;
+}
+
+function buildFilterChips() {
+  const c = countByStatus();
+  const chips = [
+    { id:"all", label:"ყველა", count:c.all },
+    { id:"new", label:"ახალი", count:c.new },
+    { id:"in_progress", label:"პროცესში", count:c.in_progress },
+    { id:"overdue", label:"ვადაგად.", count:c.overdue },
+    { id:"problem", label:"პრობლემა", count:c.problem },
+    { id:"completed", label:"დასრულ.", count:c.completed }
+  ];
+  const box = $("filterChips");
+  box.innerHTML = "";
+  chips.forEach(ch => {
+    const b = document.createElement("button");
+    b.className = "chip" + (currentFilter === ch.id ? " active" : "");
+    b.innerHTML = `${ch.label}${ch.count ? `<span class="badge">${ch.count}</span>` : ""}`;
+    b.onclick = () => { currentFilter = ch.id; buildFilterChips(); renderTasks(); };
+    box.appendChild(b);
+  });
+}
+
+function renderTasks() {
+  const list = $("tasksList");
+  const q = ($("searchInput").value || "").toLowerCase().trim();
+  let tasks = allTasks.slice();
+  if (currentFilter !== "all") tasks = tasks.filter(t => t.Status === currentFilter);
+  if (q) tasks = tasks.filter(t =>
+    (t.Title || "").toLowerCase().includes(q) ||
+    (t.Description || "").toLowerCase().includes(q) ||
+    (t.AssignedNames || "").toLowerCase().includes(q)
+  );
+  tasks.sort((a, b) => {
+    const order = ["overdue","new","in_progress","problem","completed","closed"];
+    const ai = order.indexOf(a.Status), bi = order.indexOf(b.Status);
+    if (ai !== bi) return ai - bi;
+    return (b.DeadlineRaw || 0) - (a.DeadlineRaw || 0);
+  });
+
+  list.innerHTML = "";
+  if (!tasks.length) {
+    list.innerHTML = `<div class="empty"><div class="em">📭</div>დავალება ვერ მოიძებნა</div>`;
     return;
   }
 
-  allTasks.forEach(t=>{
+  tasks.forEach(t => {
     const div = document.createElement("div");
-    div.className = "task";
-
-    if(t.Status === "overdue") div.classList.add("overdue");
-    if(t.Status === "completed") div.classList.add("completed");
-
+    div.className = "task s-" + t.Status;
+    const late = t.Status === "overdue" ? " late" : "";
     div.innerHTML = `
-      <b>${t.Title}</b>
-      <p class="small">${t.Description}</p>
-
-      <div class="small">შემქმნელი: ${t.CreatedByName || "-"}</div>
-      <div class="small">შემსრულებელი: ${t.AssignedNames || "-"}</div>
-      <div class="small">ვადა: ${t.Deadline || "-"}</div>
-      <div class="small">პრიორიტეტი: ${t.Priority || "-"}</div>
-
-      <span class="badge">სტატუსი: ${statusName(t.Status)}</span>
-
-      ${t.CompletedByName ? `<div class="small">დაასრულა: ${t.CompletedByName}</div>` : ""}
-
-      <select onchange="changeStatus('${t.ID}',this.value)">
-        <option value="">სტატუსის შეცვლა</option>
-        <option value="new">ახალი</option>
-        <option value="in_progress">პროცესში</option>
-        <option value="problem">პრობლემა</option>
-        <option value="completed">დასრულებული</option>
-        <option value="closed">დახურვა</option>
-      </select>
+      <div class="title">${escapeHtml(t.Title)}</div>
+      <div class="desc">${escapeHtml(t.Description)}</div>
+      <div class="meta">
+        <span class="pill">📌 ${STATUS_LABEL[t.Status] || t.Status}</span>
+        <span class="pill priority-${t.Priority}">⚡ ${PRIORITY_LABEL[t.Priority] || t.Priority}</span>
+        <span class="pill deadline${late}">⏰ ${escapeHtml(t.Deadline || "")}</span>
+        <span class="pill">👤 ${escapeHtml(t.AssignedNames || "-")}</span>
+      </div>
     `;
-
-    tasks.appendChild(div);
+    div.onclick = () => openTaskDetail(t.ID);
+    list.appendChild(div);
   });
 }
 
-function statusName(status){
-  const map = {
-    new:"ახალი",
-    in_progress:"პროცესში",
-    problem:"პრობლემა",
-    completed:"დასრულებული",
-    overdue:"ვადაგადაცილებული",
-    closed:"დახურული"
-  };
+// ============================================
+// Create task
+// ============================================
+async function submitTask() {
+  const title = $("ntTitle").value.trim();
+  const description = $("ntDesc").value.trim();
+  const assignedTo = getSelectedAssignees();
+  const priority = $("ntPriority").value;
+  const deadline = $("ntDeadline").value;
 
-  return map[status] || status;
-}
-
-async function changeStatus(taskId,status){
-  if(!status) return;
-
-  const res = await api({
-    action:"updateTaskStatus",
-    userId:currentUser.ID,
-    taskId,
-    status
-  });
-
-  if(!res.success){
-    alert(res.error || "სტატუსი ვერ შეიცვალა");
+  if (!title || !description || !assignedTo.length || !deadline) {
+    alertBox("ntAlert", "შეავსე ყველა ველი და აირჩიე მინ. ერთი შემსრულებელი");
     return;
   }
+  const btn = $("ntSubmit");
+  btn.disabled = true; btn.innerHTML = '<span class="loader"></span>';
+  const res = await api({
+    action: "createTask",
+    userId: user.ID,
+    title, description, assignedTo, priority, deadline
+  });
+  btn.disabled = false; btn.innerHTML = "დავალების შექმნა";
+  if (!res.success) { alertBox("ntAlert", res.error || "შეცდომა"); return; }
+  alertBox("ntAlert", "");
+  $("ntTitle").value = ""; $("ntDesc").value = "";
+  $("ntPriority").value = "normal"; $("ntDeadline").value = "";
+  renderAssigneePicker();
+  toast("დავალება შექმნილია!", "success");
+  switchTab("tasks");
+}
 
+// ============================================
+// Task detail modal
+// ============================================
+async function openTaskDetail(taskId) {
+  const task = allTasks.find(t => t.ID === taskId);
+  if (!task) return;
+
+  const canChangeStatus = isAdmin() ||
+    task.CreatedBy === user.ID ||
+    (task.AssignedIds || []).indexOf(user.ID) >= 0;
+  const canClose = isAdmin() || task.CreatedBy === user.ID;
+
+  const wrap = document.createElement("div");
+  wrap.className = "modal-bg";
+  wrap.onclick = e => { if (e.target === wrap) closeModal(); };
+  wrap.innerHTML = `
+    <div class="modal" onclick="event.stopPropagation()">
+      <div class="modal-handle"></div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+      <h3 style="padding-right:40px">${escapeHtml(task.Title)}</h3>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:14px">
+        შემქმნელი: ${escapeHtml(task.CreatedByName || "-")} · ${escapeHtml(task.CreatedAt || "")}
+      </div>
+
+      <div class="detail-section">
+        <h4>აღწერა</h4>
+        <div style="white-space:pre-wrap;font-size:14px">${escapeHtml(task.Description)}</div>
+      </div>
+
+      <div class="detail-section">
+        <h4>დეტალები</h4>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:13px">
+          <div><span style="color:var(--muted)">სტატუსი:</span><br><b>${STATUS_LABEL[task.Status] || task.Status}</b></div>
+          <div><span style="color:var(--muted)">პრიორიტეტი:</span><br><b>${PRIORITY_LABEL[task.Priority] || task.Priority}</b></div>
+          <div><span style="color:var(--muted)">ვადა:</span><br><b>${escapeHtml(task.Deadline || "-")}</b></div>
+          <div><span style="color:var(--muted)">შემსრულებელი:</span><br><b>${escapeHtml(task.AssignedNames || "-")}</b></div>
+          ${task.CompletedByName ? `<div><span style="color:var(--muted)">დაასრულა:</span><br><b>${escapeHtml(task.CompletedByName)}</b></div>` : ""}
+          ${task.CompletedAt ? `<div><span style="color:var(--muted)">დასრ. დრო:</span><br><b>${escapeHtml(task.CompletedAt)}</b></div>` : ""}
+        </div>
+      </div>
+
+      ${canChangeStatus ? `
+      <div class="detail-section">
+        <h4>სტატუსის შეცვლა</h4>
+        <div class="status-grid">
+          <button class="s-new" onclick="changeStatus('${task.ID}','new')">📥 ახალი</button>
+          <button class="s-in_progress" onclick="changeStatus('${task.ID}','in_progress')">⏳ პროცესში</button>
+          <button class="s-problem" onclick="changeStatus('${task.ID}','problem')">⚠️ პრობლემა</button>
+          <button class="s-completed" onclick="changeStatus('${task.ID}','completed')">✅ დასრულებული</button>
+          ${canClose ? `<button class="s-closed" style="grid-column:span 2" onclick="changeStatus('${task.ID}','closed')">🔒 დახურვა</button>` : ""}
+        </div>
+      </div>` : ""}
+
+      <div class="detail-section">
+        <h4>📷 ფოტოები / ფაილები</h4>
+        <div class="att-grid" id="attGrid"><div style="grid-column:span 3;text-align:center;padding:20px;color:var(--muted)"><span class="loader"></span></div></div>
+        <input type="file" id="attInput" accept="image/*" capture="environment" style="display:none" onchange="handleFileUpload(event,'${task.ID}')">
+      </div>
+
+      <div class="detail-section">
+        <h4>💬 კომენტარები</h4>
+        <div id="commentsList"><div style="text-align:center;padding:14px;color:var(--muted)"><span class="loader"></span></div></div>
+        <div class="comment-input">
+          <textarea id="commentText" placeholder="დაწერე კომენტარი..."></textarea>
+          <button onclick="addComment('${task.ID}')">➤</button>
+        </div>
+      </div>
+    </div>
+  `;
+  $("modalContainer").appendChild(wrap);
+  loadComments(taskId);
+  loadAttachments(taskId);
+}
+
+function closeModal() {
+  $("modalContainer").innerHTML = "";
+}
+
+async function changeStatus(taskId, status) {
+  const res = await api({ action: "updateTaskStatus", userId: user.ID, taskId, status });
+  if (!res.success) { toast(res.error || "შეცდომა", "error"); return; }
+  toast("სტატუსი განახლდა", "success");
+  closeModal();
   await loadTasks();
 }
 
-window.onload = function(){
-  const saved = localStorage.getItem("taskUser");
+// ============================================
+// Comments
+// ============================================
+async function loadComments(taskId) {
+  const res = await api({ action: "getComments", userId: user.ID, taskId });
+  const box = $("commentsList");
+  if (!box) return;
+  if (!res.success) { box.innerHTML = "<div style='font-size:13px;color:var(--muted)'>კომენტარები ვერ ჩაიტვირთა</div>"; return; }
+  const comments = res.comments || [];
+  if (!comments.length) { box.innerHTML = "<div style='font-size:13px;color:var(--muted);padding:8px'>კომენტარები ჯერ არ არის</div>"; return; }
+  box.innerHTML = comments.map(c => `
+    <div class="comment">
+      <div class="who"><b>${escapeHtml(c.UserName || "-")}</b><span>${escapeHtml(c.CreatedAt || "")}</span></div>
+      <div class="text">${escapeHtml(c.Comment)}</div>
+    </div>
+  `).join("");
+}
 
-  if(saved){
-    currentUser = JSON.parse(saved);
-    init();
+async function addComment(taskId) {
+  const ta = $("commentText");
+  const text = ta.value.trim();
+  if (!text) return;
+  ta.disabled = true;
+  const res = await api({ action: "addComment", userId: user.ID, taskId, comment: text });
+  ta.disabled = false;
+  if (!res.success) { toast(res.error || "შეცდომა", "error"); return; }
+  ta.value = "";
+  loadComments(taskId);
+}
+
+// ============================================
+// Attachments
+// ============================================
+async function loadAttachments(taskId) {
+  const res = await api({ action: "getAttachments", userId: user.ID, taskId });
+  const grid = $("attGrid");
+  if (!grid) return;
+  const items = (res.success && res.attachments) || [];
+  let html = items.map(a => `
+    <div class="att" onclick="openLightbox('${a.FileUrl}')">
+      <img src="${a.ThumbUrl || a.FileUrl}" alt="${escapeHtml(a.FileName)}" loading="lazy">
+      <div class="name">${escapeHtml(a.UserName)}</div>
+    </div>
+  `).join("");
+  html += `<div class="att upload" onclick="document.getElementById('attInput').click()">
+    <span class="ic">📷</span><span>ატვირთვა</span>
+  </div>`;
+  grid.innerHTML = html;
+}
+
+async function handleFileUpload(event, taskId) {
+  const file = event.target.files[0];
+  if (!file) return;
+  toast("მზადდება...", "");
+  try {
+    const resized = await resizeImage(file, 1600, 0.85);
+    const base64 = await fileToBase64(resized);
+    const res = await api({
+      action: "uploadAttachment",
+      userId: user.ID,
+      taskId,
+      fileName: file.name,
+      mimeType: "image/jpeg",
+      fileData: base64
+    });
+    if (!res.success) { toast(res.error || "ატვირთვა ვერ შესრულდა", "error"); return; }
+    toast("ფოტო ატვირთულია!", "success");
+    loadAttachments(taskId);
+  } catch (e) {
+    toast("შეცდომა: " + e.message, "error");
   }
-};
-</script>
+  event.target.value = "";
+}
 
+function fileToBase64(blob) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = reader.result;
+      const comma = result.indexOf(",");
+      resolve(comma >= 0 ? result.slice(comma + 1) : result);
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
+}
+
+function resizeImage(file, maxDim, quality) {
+  return new Promise((resolve, reject) => {
+    if (!file.type.startsWith("image/")) { resolve(file); return; }
+    const img = new Image();
+    img.onload = () => {
+      let w = img.width, h = img.height;
+      if (w > maxDim || h > maxDim) {
+        if (w > h) { h = h * (maxDim / w); w = maxDim; }
+        else { w = w * (maxDim / h); h = maxDim; }
+      }
+      const canvas = document.createElement("canvas");
+      canvas.width = w; canvas.height = h;
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(img, 0, 0, w, h);
+      canvas.toBlob(b => resolve(b), "image/jpeg", quality);
+    };
+    img.onerror = reject;
+    img.src = URL.createObjectURL(file);
+  });
+}
+
+function openLightbox(url) {
+  const lb = document.createElement("div");
+  lb.className = "lightbox";
+  lb.onclick = () => lb.remove();
+  lb.innerHTML = `<button class="lb-close">✕</button><img src="${url}">`;
+  document.body.appendChild(lb);
+}
+
+// ============================================
+// Stats
+// ============================================
+async function loadStats() {
+  const res = await api({ action: "getStats", userId: user.ID });
+  if (!res.success) return;
+  const s = res.stats;
+  $("s2New").innerText = s.new;
+  $("s2Prog").innerText = s.in_progress;
+  $("s2Over").innerText = s.overdue;
+  $("s2Prob").innerText = s.problem;
+  $("s2Comp").innerText = s.completed;
+  $("s2All").innerText = s.total;
+  $("s2Closed").innerText = s.closed;
+}
+</script>
 </body>
 </html>
