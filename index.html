@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="ka">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Task System</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #111827, #1f2937);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 18px;
+      color: #111827;
+    }
+
+    .app {
+      width: 100%;
+      max-width: 430px;
+      background: #ffffff;
+      border-radius: 28px;
+      padding: 24px;
+      box-shadow: 0 25px 70px rgba(0,0,0,0.35);
+    }
+
+    .logo {
+      width: 58px;
+      height: 58px;
+      border-radius: 18px;
+      background: #111827;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+      margin-bottom: 18px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 26px;
+    }
+
+    .subtitle {
+      margin: 8px 0 22px;
+      color: #6b7280;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .tabs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      background: #f3f4f6;
+      padding: 5px;
+      border-radius: 16px;
+      margin-bottom: 20px;
+    }
+
+    .tab {
+      border: none;
+      padding: 12px;
+      border-radius: 13px;
+      background: transparent;
+      font-weight: 700;
+      cursor: pointer;
+      color: #6b7280;
+    }
+
+    .tab.active {
+      background: #111827;
+      color: white;
+    }
+
+    .form {
+      display: none;
+    }
+
+    .form.active {
+      display: block;
+    }
+
+    label {
+      display: block;
+      font-size: 13px;
+      font-weight: 700;
+      margin: 14px 0 7px;
+    }
+
+    input {
+      width: 100%;
+      height: 52px;
+      border: 1px solid #e5e7eb;
+      border-radius: 16px;
+      padding: 0 15px;
+      font-size: 16px;
+      outline: none;
+      background: #f9fafb;
+    }
+
+    input:focus {
+      border-color: #111827;
+      background: #fff;
+    }
+
+    button.main {
+      width: 100%;
+      height: 54px;
+      border: none;
+      border-radius: 17px;
+      background: #111827;
+      color: white;
+      font-size: 16px;
+      font-weight: 800;
+      margin-top: 20px;
+      cursor: pointer;
+    }
+
+    button.main:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .message {
+      margin-top: 15px;
+      padding: 13px;
+      border-radius: 14px;
+      font-size: 14px;
+      display: none;
+    }
+
+    .message.error {
+      display: block;
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    .message.success {
+      display: block;
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .dashboard {
+      display: none;
+    }
+
+    .user-card {
+      background: #f9fafb;
+      border-radius: 20px;
+      padding: 18px;
+      margin-top: 20px;
+      border: 1px solid #e5e7eb;
+    }
+
+    .role {
+      display: inline-block;
+      margin-top: 10px;
+      padding: 7px 11px;
+      border-radius: 999px;
+      background: #111827;
+      color: white;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .logout {
+      width: 100%;
+      height: 50px;
+      margin-top: 20px;
+      border: none;
+      border-radius: 16px;
+      background: #ef4444;
+      color: white;
+      font-weight: 800;
+      cursor: pointer;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="app">
+
+    <div id="authBox">
+      <div class="logo">✓</div>
+      <h1>Task System</h1>
+      <p class="subtitle">
+        თანამშრომლების დავალებების მართვის სისტემა
+      </p>
+
+      <div class="tabs">
+        <button class="tab active" onclick="showForm('login')">შესვლა</button>
+        <button class="tab" onclick="showForm('register')">რეგისტრაცია</button>
+      </div>
+
+      <div id="loginForm" class="form active">
+        <label>ტელეფონი</label>
+        <input id="loginPhone" type="text" placeholder="მაგ: admin" />
+
+        <label>პაროლი</label>
+        <input id="loginPassword" type="password" placeholder="მაგ: 1234" />
+
+        <button class="main" onclick="login()">შესვლა</button>
+      </div>
+
+      <div id="registerForm" class="form">
+        <label>სახელი და გვარი</label>
+        <input id="regName" type="text" placeholder="მაგ: გიორგი გიორგაძე" />
+
+        <label>ტელეფონი</label>
+        <input id="regPhone" type="text" placeholder="მაგ: 599123456" />
+
+        <label>პაროლი</label>
+        <input id="regPassword" type="password" placeholder="შეიყვანე პაროლი" />
+
+        <label>პოზიცია</label>
+        <input id="regPosition" type="text" placeholder="მაგ: მენეჯერი" />
+
+        <button class="main" onclick="register()">რეგისტრაცია</button>
+      </div>
+
+      <div id="message" class="message"></div>
+    </div>
+
+    <div id="dashboard" class="dashboard">
+      <div class="logo">✓</div>
+      <h1>მოგესალმები</h1>
+      <p class="subtitle">შესვლა წარმატებით შესრულდა</p>
+
+      <div class="user-card">
+        <h2 id="userName"></h2>
+        <p id="userPhone"></p>
+        <p id="userPosition"></p>
+        <span id="userRole" class="role"></span>
+      </div>
+
+      <button class="logout" onclick="logout()">გასვლა</button>
+    </div>
+
+  </div>
+
+  <script>
+    const API_URL = "https://script.google.com/macros/s/AKfycbwkkhmujGNq5iF-esZVKwR2hkMRApMuSzFvr0HKdqJ1uToJvOOvgC0JVA17iMQu4Ler/exec";
+
+    function showForm(type) {
+      document.querySelectorAll(".tab").forEach(btn => btn.classList.remove("active"));
+      document.querySelectorAll(".form").forEach(form => form.classList.remove("active"));
+
+      if (type === "login") {
+        document.querySelectorAll(".tab")[0].classList.add("active");
+        document.getElementById("loginForm").classList.add("active");
+      } else {
+        document.querySelectorAll(".tab")[1].classList.add("active");
+        document.getElementById("registerForm").classList.add("active");
+      }
+
+      clearMessage();
+    }
+
+    async function login() {
+      const phone = document.getElementById("loginPhone").value.trim();
+      const password = document.getElementById("loginPassword").value.trim();
+
+      if (!phone || !password) {
+        showMessage("ტელეფონი და პაროლი აუცილებელია", "error");
+        return;
+      }
+
+      const res = await sendRequest({
+        action: "login",
+        phone,
+        password
+      });
+
+      if (!res.success) {
+        showMessage(res.error || "შესვლა ვერ შესრულდა", "error");
+        return;
+      }
+
+      localStorage.setItem("taskUser", JSON.stringify(res.user));
+      showDashboard(res.user);
+    }
+
+    async function register() {
+      const name = document.getElementById("regName").value.trim();
+      const phone = document.getElementById("regPhone").value.trim();
+      const password = document.getElementById("regPassword").value.trim();
+      const position = document.getElementById("regPosition").value.trim();
+
+      if (!name || !phone || !password || !position) {
+        showMessage("ყველა ველის შევსება აუცილებელია", "error");
+        return;
+      }
+
+      const res = await sendRequest({
+        action: "register",
+        name,
+        phone,
+        password,
+        position
+      });
+
+      if (!res.success) {
+        showMessage(res.error || "რეგისტრაცია ვერ შესრულდა", "error");
+        return;
+      }
+
+      showMessage("რეგისტრაცია წარმატებით დასრულდა. ახლა შედი სისტემაში.", "success");
+      showForm("login");
+      document.getElementById("loginPhone").value = phone;
+    }
+
+    async function sendRequest(data) {
+      try {
+        const response = await fetch(API_URL, {
+          method: "POST",
+          body: JSON.stringify(data)
+        });
+
+        return await response.json();
+      } catch (err) {
+        return {
+          success: false,
+          error: "სერვერთან კავშირი ვერ მოხერხდა"
+        };
+      }
+    }
+
+    function showDashboard(user) {
+      document.getElementById("authBox").style.display = "none";
+      document.getElementById("dashboard").style.display = "block";
+
+      document.getElementById("userName").innerText = user.Name;
+      document.getElementById("userPhone").innerText = "ტელეფონი: " + user.Phone;
+      document.getElementById("userPosition").innerText = "პოზიცია: " + user.Position;
+      document.getElementById("userRole").innerText = user.Role;
+    }
+
+    function logout() {
+      localStorage.removeItem("taskUser");
+      location.reload();
+    }
+
+    function showMessage(text, type) {
+      const msg = document.getElementById("message");
+      msg.innerText = text;
+      msg.className = "message " + type;
+    }
+
+    function clearMessage() {
+      const msg = document.getElementById("message");
+      msg.innerText = "";
+      msg.className = "message";
+    }
+
+    window.onload = function () {
+      const savedUser = localStorage.getItem("taskUser");
+
+      if (savedUser) {
+        showDashboard(JSON.parse(savedUser));
+      }
+    };
+  </script>
+
+</body>
+</html>
